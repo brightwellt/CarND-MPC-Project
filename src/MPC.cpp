@@ -24,7 +24,7 @@ const double Lf = 2.67;
 // Desired values for error, and how fast we want to go
 double ref_cte = 0;
 double ref_epsi = 0;
-double ref_v = 100;
+double ref_v = 50; // Was 40
 
 size_t x_start = 0;
 size_t y_start = x_start + N;
@@ -54,21 +54,21 @@ class FG_eval {
 	// Good position, heading. Smooth steering, acceleration. High speed is least important.
 	for (unsigned int t = 0; t < N; t++)
 	{
-		fg[0] += 700 * CppAD::pow(vars[cte_start + t], 2); // 2000
-		fg[0] += 400 * CppAD::pow(vars[epsi_start + t], 2); //2000
+		fg[0] += 2 * CppAD::pow(vars[cte_start + t], 2); // 1
+		fg[0] += 1500 * CppAD::pow(vars[epsi_start + t], 2); //1500
 		fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
 	}
 	
 	for (unsigned int t = 0; t < N - 1; t++)
 	{
-		fg[0] += 5 * CppAD::pow(vars[delta_start + t], 2);
-		fg[0] += 5 * CppAD::pow(vars[a_start + t], 2);
+		fg[0] += 5 * CppAD::pow(vars[delta_start + t], 2); // 5
+		fg[0] += 5 * CppAD::pow(vars[a_start + t], 2); // 5
 	}
 	
 	for (unsigned int t = 0; t < N - 2; t++)
 	{
-		fg[0] += 200 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2); 
-		fg[0] += 10 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+		fg[0] += 500 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);  // 2000
+		fg[0] += 500 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2); // 500
 	}
 	
 	// Setup Constraints.

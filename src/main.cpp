@@ -125,16 +125,19 @@ int main() {
 		  // double epsi = psi - atan(coeffs[1]) + 2 * px * coeffs[2] + 3 * coeffs[3] * pow(px, 2)
 		  double epsi = -atan(coeffs[1]);
 		  
-          //double steer_value = j[1]["steering_angle"];
-          //double throttle_value = j[1]["throttle"];
-
+          double steer_prev = j[1]["steering_angle"];
+          double throttle_prev = j[1]["throttle"];
+		  double x_new = v * 0.1;
+		  double theta_new = 0 - (v / 2.67 * steer_prev * 0.1 );
+		  double v_new = v + throttle_prev * 0.1;
+		  
 		  Eigen::VectorXd state(6);
 		  // x, y, theta all zero.
-		  state << 0, 0, 0, v, cte, epsi;
+		  state << x_new, 0, theta_new, v_new, cte, epsi;
 		  
 		  auto vars = mpc.Solve(state, coeffs);
 		  
-		  double Lf = 2.67;
+		  //double Lf = 2.67;
 		  
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
@@ -193,7 +196,7 @@ int main() {
           //
           // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE
           // SUBMITTING.
-          //this_thread::sleep_for(chrono::milliseconds(100));
+          this_thread::sleep_for(chrono::milliseconds(100));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {

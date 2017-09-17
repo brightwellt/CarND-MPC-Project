@@ -52,23 +52,23 @@ class FG_eval {
 	//  Reference State Cost
 	// Note the emphasis given to different constraints. In order, we want
 	// Good position, heading. Smooth steering, acceleration. High speed is least important.
-	for (int i = 0; i < N; i++)
+	for (unsigned int t = 0; t < N; t++)
 	{
-		fg[0] += 2000 * CppAD::pow(vars[cte_start + i] - ref_cte, 2);
-		fg[0] += 2000 * CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
-		fg[0] += CppAD::pow(vars[v_start + i] - ref_v, 2);
+		fg[0] += 700 * CppAD::pow(vars[cte_start + t], 2); // 2000
+		fg[0] += 400 * CppAD::pow(vars[epsi_start + t], 2); //2000
+		fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
 	}
 	
-	for (int i = 0; i < N - 1; i++)
+	for (unsigned int t = 0; t < N - 1; t++)
 	{
-		fg[0] += 5 * CppAD::pow(vars[delta_start + i], 2);
-		fg[0] += 5 * CppAD::pow(vars[a_start + i], 2);
+		fg[0] += 5 * CppAD::pow(vars[delta_start + t], 2);
+		fg[0] += 5 * CppAD::pow(vars[a_start + t], 2);
 	}
 	
-	for (int i = 0; i < N - 2; i++)
+	for (unsigned int t = 0; t < N - 2; t++)
 	{
-		fg[0] += 200 * CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2); 
-		fg[0] += 10 * CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
+		fg[0] += 200 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2); 
+		fg[0] += 10 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
 	}
 	
 	// Setup Constraints.
@@ -81,37 +81,37 @@ class FG_eval {
 	fg[1 + epsi_start] = vars[epsi_start];
 	
 	// Remaining constraints
-	for (int i = 0; i < N - 1; i++)
+	for (unsigned int t = 1; t < N; t++)
 	{
 		// t + 1
-		AD<double> x1 = vars[x_start + i + 1];
-		AD<double> y1 = vars[y_start + i + 1];
-		AD<double> psi1 = vars[psi_start + i + 1];
-		AD<double> v1 = vars[v_start + i + 1];
-		AD<double> cte1 = vars[cte_start + i + 1];
-		AD<double> epsi1 = vars[epsi_start + i + 1];
+		AD<double> x1 = vars[x_start + t];
+		AD<double> y1 = vars[y_start + t];
+		AD<double> psi1 = vars[psi_start + t];
+		AD<double> v1 = vars[v_start + t];
+		AD<double> cte1 = vars[cte_start + t];
+		AD<double> epsi1 = vars[epsi_start + t];
 		
 		// t + 0
-		AD<double> x0 = vars[x_start + i];
-		AD<double> y0 = vars[y_start + i];
-		AD<double> psi0 = vars[psi_start + i];
-		AD<double> v0 = vars[v_start + i];
-		AD<double> cte0 = vars[cte_start + i];
-		AD<double> epsi0 = vars[epsi_start + i];
+		AD<double> x0 = vars[x_start + t - 1];
+		AD<double> y0 = vars[y_start + t - 1];
+		AD<double> psi0 = vars[psi_start + t - 1];
+		AD<double> v0 = vars[v_start + t - 1];
+		AD<double> cte0 = vars[cte_start + t - 1];
+		AD<double> epsi0 = vars[epsi_start + t - 1];
 		
-		AD<double> delta0 = vars[delta_start + i];
-		AD<double> a0 = vars[a_start + i];
+		AD<double> delta0 = vars[delta_start + t - 1];
+		AD<double> a0 = vars[a_start + t - 1];
 		
 		AD<double> f0 = coeffs[0] + coeffs[1] * x0 + coeffs[2] * x0 * x0 + coeffs[3] * x0 * x0 * x0;
 		AD<double> psides0 = CppAD::atan(3 * coeffs[3] * x0 * x0 + 2 * coeffs[2] * x0 + coeffs[1]);
 		
 		// Constrain x to be 0;
-		fg[2 + x_start + i] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);  // Value at t1 has to be x1 - the modified x0
-		fg[2 + y_start + i] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
-		fg[2 + psi_start + i] = psi1 - (psi0 - v0 * delta0 / Lf * dt);
-		fg[2 + v_start + i] = v1 - v0 + (a0 * dt);
-		fg[2 + cte_start + i] = cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
-		fg[2 + epsi_start + i] = epsi1 - ((psi0 - psides0) - v0 * delta0 / Lf * dt);
+		fg[1 + x_start + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);  // Value at t1 has to be x1 - the modified x0
+		fg[1 + y_start + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
+		fg[1 + psi_start + t] = psi1 - (psi0 + v0 * delta0 / Lf * dt);
+		fg[1 + v_start + t] = v1 - (v0 + a0 * dt);
+		fg[1 + cte_start + t] = cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
+		fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) + v0 * delta0 / Lf * dt);
 	}
   }
 };
@@ -146,7 +146,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // Initial value of the independent variables.
   // SHOULD BE 0 besides initial state.
   Dvector vars(n_vars);
-  for (int i = 0; i < n_vars; i++) {
+  for (unsigned int i = 0; i < n_vars; i++) {
     vars[i] = 0;
   }
 
@@ -155,7 +155,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // TODO: Set lower and upper limits for variables.
   
   // Set all non-actuator upper and lower limits to the max possible values.
-	for (int i = 0; i < delta_start; i++)
+	for (unsigned int i = 0; i < delta_start; i++)
 	{
 		vars_lowerbound[i] = -1.0e19;
 		vars_upperbound[i] = 1.0e19;
@@ -163,14 +163,14 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 	
 	// The upper and lower limits of delta are set to -25 and + 25.
 	// degrees (values in radians).
-	for (int i = delta_start; i < a_start; i++)
+	for (unsigned int i = delta_start; i < a_start; i++)
 	{
-		vars_lowerbound[i] = -0.436332 * Lf; //is 25 deg to radians
-		vars_upperbound[i] = 0.436332 * Lf;
+		vars_lowerbound[i] = -0.436332; //is 25 deg to radians
+		vars_upperbound[i] = 0.436332;
 	}
 	
 	// Acceleration / deceleration upper and lower limits
-	for (int i = a_start; i < n_vars; i++)
+	for (unsigned int i = a_start; i < n_vars; i++)
 	{
 		vars_lowerbound[i] = -1.0;
 		vars_upperbound[i] = 1.0;
@@ -180,7 +180,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // Should be 0 besides initial state.
   Dvector constraints_lowerbound(n_constraints);
   Dvector constraints_upperbound(n_constraints);
-  for (int i = 0; i < n_constraints; i++) {
+  for (unsigned int i = 0; i < n_constraints; i++) {
     constraints_lowerbound[i] = 0;
     constraints_upperbound[i] = 0;
   }
@@ -243,10 +243,11 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   vector<double> result;
   result.push_back(solution.x[delta_start]);
   result.push_back(solution.x[a_start]);
-  for (int i = 0; i < N - 1; i++)
+  
+  for (unsigned int i = 0; i < N; i++)
   {
-	  result.push_back(solution.x[x_start + i + 1]);
-	  result.push_back(solution.x[y_start + i + 1]);
+	  result.push_back(solution.x[x_start + i]);
+	  result.push_back(solution.x[y_start + i]);
   }
   
   return result;

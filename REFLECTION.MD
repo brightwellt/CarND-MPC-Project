@@ -35,14 +35,16 @@ I found a balanced of a very slight emphasis on cross track error, compared with
 ## Student discusses the reasoning behind the chosen N (timestep length) and dt (elapsed duration between timesteps) values. 
 
 For driving round at racetrack speeds, it doesn't make sense to predict more than 1-2 seconds into the future. For certain sections such as tight bends, the required inputs even just 1 second later could be radically different. Were we driving a train, with much slower acceleration then we may want to look further ahead. 
-For MPC we have T = N * dt. Given a desired T of 1s, I started out with N = 10, dt = 0.1. I was able to tune my model's weights satisfactorily using these values, but also looked at N = 20, dt = 0.05; another popular choice on the forums.
-For fun I also tried N = 50, dt = 0.1.
+For MPC we have T = N * dt. Given a desired T of 1s, I started out with N = 10, dt = 0.1. I was able to tune my model's weights satisfactorily using these values, but also looked at N = 20, dt = 0.05; another popular choice on the forums. This looked viable, with the right tuning.
+
+As an experiment, I also tried increasing to N=50, dt = 0.1. This looks nice and smooth until the bend before the bridge, until we predict a full circle for movement (we're looking too far ahead) and max out the steering angle. 
+Setting N=5, dt = 0.1 looked liked it would make it round the track with more tuning, but it wasn't seeing the bends in advance, and ergo wasn't steering as rapidly as it needed to.
 
 # Polynomial Fitting and MPC Preprocessing
 ## A polynomial is fitted to waypoints.
 ## If the student preprocesses waypoints, the vehicle state, and/or actuators prior to the MPC procedure it is described.
 
-The x, y values are transformed into vehicle space i.e. so that the vehicle is at 0, 0.
+The x, y values are transformed into vehicle space i.e. so that the vehicle is at 0, 0, 0. The polyfit function is then called.
 
 # Model Predictive Control with Latency
 ## The student implements Model Predictive Control that handles a 100 millisecond latency. 

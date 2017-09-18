@@ -4,8 +4,8 @@
 ## Student describes their model in detail. This includes the state, actuators and update equations.
 The objective was to use Model Predictive Control, to drive a car successfully round the simulator track.
 Here is the model used:
-[./MPCModel.PNG](Lesson 19 Model Image)
-This comes from Lesson 18 Vehicle Models.
+![Lesson 19 Model Image](MPCModel.PNG)
+These come from Lessons 18 and 19 in the course.
 
 The car state we use includes:
 - current x, y position
@@ -52,4 +52,4 @@ To cope with the latency, I did some tuning as described previously. I also took
 
 # Video of car
 I settled on a speed of 50 for passing the project requirement. A video of the car driving round the track can be found here:
-[./output_video.mp4](Video of car going round track)
+![Video of car going round track](output_video.mp4)
